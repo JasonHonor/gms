@@ -21,9 +21,10 @@ func TestGet5700Info(t *testing.T) {
 			Port:            22,
 			Username:        g.Cfg().Get("user").(string),
 			Password:        g.Cfg().Get("pwd").(string),
-			MoreTag:         "More",
+			MoreTag:         "---- More ----",
+			IsMoreLine:      true,
 			MoreWant:        " ",
-			ColorTag:        "\u001b[42D",
+			ColorTag:        "1b5b343244H", //\u001b[42D
 			ReadOnlyPrompt:  ">",
 			SysEnablePrompt: "]",
 			LineBreak:       "\r\n",
