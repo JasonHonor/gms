@@ -2,12 +2,8 @@ package huawei
 
 import (
 	"fmt"
-	. "gms/utils"
 	"testing"
 
-	"github.com/gogf/gf/container/garray"
-	"github.com/gogf/gf/container/gmap"
-	"github.com/gogf/gf/container/gset"
 	"github.com/gogf/gf/frame/g"
 )
 
@@ -15,27 +11,7 @@ func TestGet5700Info(t *testing.T) {
 
 	g.Cfg().SetFileName("config.json")
 
-	dev := S5700{
-		SSHClient: SSHClient{
-			Host:            g.Cfg().Get("host").(string),
-			Port:            22,
-			Username:        g.Cfg().Get("user").(string),
-			Password:        g.Cfg().Get("pwd").(string),
-			MoreTag:         "---- More ----",
-			IsMoreLine:      true,
-			MoreWant:        " ",
-			ColorTag:        "1b5b343244H", //\u001b[42D
-			ReadOnlyPrompt:  ">",
-			SysEnablePrompt: "]",
-			LineBreak:       "\r\n",
-			ExitCmd:         "quit",
-		},
-		InterfaceList:   gset.NewSet(),
-		InterfaceIpList: gset.NewSet(),
-		ArpTable:        garray.NewArray(),
-		IfArpCounts:     gmap.NewStrIntMap(),
-		UpStreamIf:      "GigabitEthernet0/0/24",
-	}
+	dev := NewS5700(g.Cfg().Get("host").(string), g.Cfg().Get("user").(string), g.Cfg().Get("pwd").(string))
 
 	dev.Probe()
 	dev.Save()
@@ -54,26 +30,7 @@ func TestGet5700InfoByCache(t *testing.T) {
 
 	g.Cfg().SetFileName("config.json")
 
-	dev := S5700{
-		SSHClient: SSHClient{
-			Host:            g.Cfg().Get("host").(string),
-			Port:            22,
-			Username:        g.Cfg().Get("user").(string),
-			Password:        g.Cfg().Get("pwd").(string),
-			MoreTag:         "More",
-			MoreWant:        " ",
-			ColorTag:        "\u001b[42D",
-			ReadOnlyPrompt:  ">",
-			SysEnablePrompt: "]",
-			LineBreak:       "\r\n",
-			ExitCmd:         "quit",
-		},
-		InterfaceList:   gset.NewSet(),
-		InterfaceIpList: gset.NewSet(),
-		ArpTable:        garray.NewArray(),
-		IfArpCounts:     gmap.NewStrIntMap(),
-		UpStreamIf:      "GigabitEthernet0/0/24",
-	}
+	dev := NewS5700(g.Cfg().Get("host").(string), g.Cfg().Get("user").(string), g.Cfg().Get("pwd").(string))
 
 	dev.Load()
 	//dev.Dump()

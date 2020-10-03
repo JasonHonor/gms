@@ -23,6 +23,8 @@ type C2960 struct {
 	UpStreamIf string
 
 	ArpTable *garray.Array
+
+	PhoneTable *garray.Array
 }
 
 // IPInterface switch interface with ip info.
@@ -142,6 +144,13 @@ func (dev *C2960) Dump() {
 			fmt.Printf("Err=%v\n", err3)
 		}
 	*/
+
+	s4, err4 := json.Marshal(dev.PhoneTable)
+	if err4 == nil {
+		fmt.Printf("PhoneTable count=%d %s\n", dev.PhoneTable.Len(), s4)
+	} else {
+		fmt.Printf("Err=%v\n", err4)
+	}
 }
 
 /*

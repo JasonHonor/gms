@@ -3,6 +3,8 @@ package huawei
 import (
 	"gms/utils"
 	"strings"
+
+	"github.com/gogf/gf/frame/g"
 )
 
 func (dev *S5700) ParseIpInterface(lines []string) {
@@ -63,6 +65,9 @@ func (dev *S5700) ParseInterface(lines []string) {
 }
 
 func (dev *S5700) ParseArp(lines []string) {
+
+	sPhonePrefix := g.Cfg().Get("phone").(string)
+
 	var isData bool = false
 	var lastId int
 	for _, li := range lines {
@@ -87,6 +92,10 @@ func (dev *S5700) ParseArp(lines []string) {
 				//save interface info
 				dev.ArpTable.Append(arp)
 				lastId = dev.ArpTable.Len() - 1
+
+				if len(sPhonePrefix) > 0 && strings.HasPrefix(arp.Mac, sPhonePrefix) {
+					dev.PhoneTable.Append(arp)
+				}
 			} else {
 				obj, found := dev.ArpTable.Get(lastId)
 				if found {

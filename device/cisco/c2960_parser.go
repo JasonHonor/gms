@@ -3,6 +3,8 @@ package cisco
 import (
 	"gms/utils"
 	"strings"
+
+	"github.com/gogf/gf/frame/g"
 )
 
 func (dev *C2960) ParseIpInterface(lines []string) {
@@ -61,6 +63,9 @@ func (dev *C2960) ParseInterface(lines []string) {
 }
 
 func (dev *C2960) ParseArp(lines []string) {
+
+	sPhonePrefix := g.Cfg().Get("phone").(string)
+
 	var isData bool = false
 	for _, li := range lines {
 		//skip title line
@@ -82,6 +87,10 @@ func (dev *C2960) ParseArp(lines []string) {
 
 				//save interface info
 				dev.ArpTable.Append(arp)
+
+				if len(sPhonePrefix) > 0 && strings.Contains(arp.Mac, sPhonePrefix) {
+					dev.PhoneTable.Append(arp)
+				}
 			}
 		}
 	}

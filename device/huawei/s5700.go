@@ -2,7 +2,7 @@ package huawei
 
 import (
 	"fmt"
-	"gms/utils"
+	. "gms/utils"
 	"strconv"
 	"strings"
 
@@ -60,7 +60,7 @@ type ArpItem struct {
 
 // S5700 Switch demo
 type S5700 struct {
-	utils.SSHClient
+	SSHClient
 
 	//Switch interface list
 	InterfaceList *gset.Set
@@ -71,6 +71,8 @@ type S5700 struct {
 	UpStreamIf string
 
 	ArpTable *garray.Array
+
+	PhoneTable *garray.Array
 
 	IfArpCounts *gmap.StrIntMap
 }
@@ -196,5 +198,39 @@ func (dev *S5700) DumpArpTables() {
 		fmt.Printf("Arp Count=%d %s\n", dev.ArpTable.Len(), s3)
 	} else {
 		fmt.Printf("Err=%v\n", err3)
+	}
+
+	s4, err4 := json.Marshal(dev.PhoneTable)
+	if err4 == nil {
+		fmt.Printf("PhoneTable count=%d %s\n", dev.PhoneTable.Len(), s4)
+	} else {
+		fmt.Printf("Err=%v\n", err4)
+	}
+
+	fmt.Printf("ArpSum Total:%d Phone:%d PC:%d\n", dev.ArpTable.Len(), dev.PhoneTable.Len(), dev.ArpTable.Len()-dev.PhoneTable.Len())
+}
+
+func NewS5700(host, user, pwd string) *S5700 {
+	return &S5700{
+		SSHClient: SSHClient{
+			Host:            host,
+			Port:            22,
+			Username:        user,
+			Password:        pwd,
+			MoreTag:         "---- More ----",
+			IsMoreLine:      true,
+			MoreWant:        " ",
+			ColorTag:        "1b5b343244H", //\u001b[42D
+			ReadOnlyPrompt:  ">",
+			SysEnablePrompt: "]",
+			LineBreak:       "\r\n",
+			ExitCmd:         "quit",
+		},
+		InterfaceList:   gset.NewSet(),
+		InterfaceIpList: gset.NewSet(),
+		ArpTable:        garray.NewArray(),
+		PhoneTable:      garray.NewArray(),
+		IfArpCounts:     gmap.NewStrIntMap(),
+		UpStreamIf:      "GigabitEthernet0/0/24",
 	}
 }
