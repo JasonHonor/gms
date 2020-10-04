@@ -193,6 +193,7 @@ func (dev *S5700) Dump() {
 }
 
 func (dev *S5700) DumpArpTables() {
+
 	s3, err3 := json.Marshal(dev.IfArpCounts)
 	if err3 == nil {
 		fmt.Printf("Arp Count=%d %s\n", dev.ArpTable.Len(), s3)
@@ -200,12 +201,12 @@ func (dev *S5700) DumpArpTables() {
 		fmt.Printf("Err=%v\n", err3)
 	}
 
-	s4, err4 := json.Marshal(dev.PhoneTable)
+	/*s4, err4 := json.Marshal(dev.PhoneTable)
 	if err4 == nil {
 		fmt.Printf("PhoneTable count=%d %s\n", dev.PhoneTable.Len(), s4)
 	} else {
 		fmt.Printf("Err=%v\n", err4)
-	}
+	}*/
 
 	fmt.Printf("ArpSum Total:%d Phone:%d PC:%d\n", dev.ArpTable.Len(), dev.PhoneTable.Len(), dev.ArpTable.Len()-dev.PhoneTable.Len())
 }
