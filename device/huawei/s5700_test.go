@@ -1,13 +1,35 @@
 package huawei
 
 import (
+	"encoding/json"
 	"fmt"
+	"gms/service"
 	"gms/utils"
+	"io/ioutil"
+	"strings"
 	"testing"
+
+	"github.com/gogf/gf/frame/g"
+	"github.com/gogf/gf/os/gfile"
 )
 
-/*
+type HostPort struct {
+	Name     string `json:"name"`
+	UpStream bool   `json:"upstream"`
+	Host     string `json:"host"`
+}
+
+type HostConfigItem struct {
+	Host      string     `json:"host"`
+	User      string     `json:"user"`
+	Ports     []HostPort `json:"ports"`
+	Community string     `json:"community"`
+	//has walked ?
+	Walked bool
+}
+
 func TestGet5700Info(t *testing.T) {
+	return
 
 	g.Cfg().SetFileName("config.json")
 
@@ -24,9 +46,51 @@ func TestGet5700Info(t *testing.T) {
 
 	//arpList := dev.FindArpListByMac("c81f")
 	//fmt.Printf("ArpList Cnt=%d %v\n", len(arpList), arpList)
+	//register to zabbix
+	dev.ArpTable.Iterator(func(k int, v interface{}) bool {
+		arpItem, ok1 := v.(ArpItem)
+		if ok1 {
+
+			group := service.GetHostGroupIdByName(t, arpItem.Vlan)
+
+			if len(group) > 0 {
+				service.CreateHostByGroupId(group, arpItem.IP, arpItem.Mac, t)
+			}
+		}
+		return true
+	})
+}
+
+func filterByMacPrefixFile(mac, file string) bool {
+
+	var sMac string = ""
+	sMac = strings.ReplaceAll(mac, ":", "")
+	sMac = strings.ToUpper(sMac)
+
+	//filter by file lines.
+	var sFileContent string = ""
+	f, err := ioutil.ReadFile(file)
+	if err == nil {
+		sFileContent = string(f)
+	} else {
+		return false
+	}
+
+	sFileLines := strings.Split(sFileContent, "\n")
+	var bFound bool = false
+	for _, sFileLine := range sFileLines {
+		//fmt.Printf("Filter 1. %s 2. %s\n", sFileLine, sMac)
+		if strings.HasPrefix(sMac, sFileLine) {
+			bFound = true
+			break
+		}
+	}
+
+	return bFound
 }
 
 func TestGet5700InfoByCache(t *testing.T) {
+	return
 
 	g.Cfg().SetFileName("config.json")
 
@@ -36,15 +100,35 @@ func TestGet5700InfoByCache(t *testing.T) {
 	//dev.Dump()
 	dev.DumpArpTables()
 
+	//register to zabbix
+	dev.ArpTable.Iterator(func(k int, v interface{}) bool {
+		arpItem, ok1 := v.(ArpItem)
+		if ok1 {
+
+			group := service.GetHostGroupIdByName(t, arpItem.Vlan)
+
+			if len(group) > 0 {
+				service.CreateHostByGroupId(group, arpItem.IP, arpItem.Mac, t)
+			}
+		}
+
+		return true
+	})
+
 	//FindInterfaceByIP
 	ifName := dev.FindInterfaceByIP("172.20.81.11")
 	fmt.Printf("IfName %s\n", ifName)
 
-	//arpList := dev.FindArpListByMac("c81f")
-	//fmt.Printf("ArpList Cnt=%d %v\n", len(arpList), arpList)
+	arpList := dev.FindArpListByMac("c81f")
+	fmt.Printf("ArpList Cnt=%d %v\n", len(arpList), arpList)
+
+	dev.PrintDhcpLeaseFile("c81f", "65")
+	//fmt.Printf("ArpList Cnt=%d %v\n", len(arpList2), arpList2)
 }
 
 func TestGetSnmpInfo(t *testing.T) {
+	return
+
 	hOids := NewHuaweiSnmpOids()
 	utils.GetSNMPInfo("172.20.65.254", "",
 		[]string{hOids.SysName, hOids.SysDescription, hOids.SysUptime, hOids.SysObjectID})
@@ -53,8 +137,10 @@ func TestGetSnmpInfo(t *testing.T) {
 	utils.GetSNMPInfo("172.20.65.249", "",
 		[]string{hOids.SysName, hOids.SysDescription, hOids.SysUptime, hOids.SysObjectID})
 }
-*/
+
 func TestWalkSnmpOid(t *testing.T) {
+	return
+
 	hOids := NewHuaweiSnmpOids()
 	/*utils.WalkSnmpOid("172.20.65.254", "",
 		hOids.PhysicalNameTable)
@@ -95,4 +181,37 @@ func TestWalkSnmpOid(t *testing.T) {
 	fmt.Println("---------WEST-B2------------------")
 	utils.WalkSnmpOid("172.20.65.248", "",
 		hOids.ArpTable, true)
+}
+
+func WalkHost(host HostConfigItem) {
+	fmt.Printf("Host %v\n", host.Host)
+
+	sOid := "1.3.6.1.2.1.4.22.1.2"
+
+	if host.Community != "" {
+		utils.WalkSnmpOid(host.Host, host.Community,
+			sOid, true)
+
+		fmt.Printf("Host %v Count=%d\n", host.Host, utils.SnmpCount)
+	}
+}
+
+func TestWalkConfigFile(t *testing.T) {
+
+	hosts := []HostConfigItem{}
+
+	intBytes := gfile.GetBytes("config.json")
+
+	err := json.Unmarshal(intBytes, &hosts)
+	if err != nil {
+		fmt.Printf("Error:%v\n", err)
+	}
+
+	fmt.Printf("Hosts:%v\n", hosts)
+
+	for _, host := range hosts {
+		if !host.Walked {
+			WalkHost(host)
+		}
+	}
 }

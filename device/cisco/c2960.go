@@ -24,6 +24,8 @@ type C2960 struct {
 
 	ArpTable *garray.Array
 
+	MacTable *garray.Array
+
 	PhoneTable *garray.Array
 }
 
@@ -83,15 +85,19 @@ func (dev *C2960) Probe() {
 	}
 
 	results := dev.Execute([]string{
-		//"show arp",
+		"show arp",
 		"show mac addr",
 	})
 
-	fmt.Printf("%v\n", results)
+	fmt.Printf("results %v\n", results)
 
 	for _, ret := range results {
 		//fetch first line
 		lines := strings.Split(ret, dev.LineBreak)
+
+		if len(lines) > 0 {
+			fmt.Printf("line = %s\n", lines[0])
+		}
 
 		if len(lines) > 0 && lines[0] == "disp ip int bri" {
 			dev.ParseIpInterface(lines)
@@ -105,9 +111,9 @@ func (dev *C2960) Probe() {
 			dev.ParseArp(lines)
 		}
 
-		/*if len(lines) > 0 && lines[0] == "show mac addr" {
+		if len(lines) > 0 && lines[0] == "show mac addr" {
 			dev.ParseMacAddr(lines)
-		}*/
+		}
 	}
 }
 
@@ -137,28 +143,27 @@ func (dev *C2960) Dump() {
 		fmt.Printf("Err=%v\n", err2)
 	}
 
-	/*	s3, err3 := json.Marshal(dev.IfArpCounts)
-		if err3 == nil {
-			fmt.Printf("%s\n", s3)
-		} else {
-			fmt.Printf("Err=%v\n", err3)
-		}
-	*/
+	/*s3, err3 := json.Marshal(dev.IfArpCounts)
+	if err3 == nil {
+		fmt.Printf("%s\n", s3)
+	} else {
+		fmt.Printf("Err=%v\n", err3)
+	}*/
 
-	s4, err4 := json.Marshal(dev.PhoneTable)
+	/*s4, err4 := json.Marshal(dev.PhoneTable)
 	if err4 == nil {
 		fmt.Printf("PhoneTable count=%d %s\n", dev.PhoneTable.Len(), s4)
 	} else {
 		fmt.Printf("Err=%v\n", err4)
-	}
+	}*/
+	dev.DumpMacTables()
 }
 
-/*
-func (dev *C2960) DumpArpTables() {
-	s3, err3 := json.Marshal(dev.IfArpCounts)
+func (dev *C2960) DumpMacTables() {
+	s3, err3 := json.Marshal(dev.MacTable)
 	if err3 == nil {
-		fmt.Printf("Arp Count=%d %s\n", dev.ArpTable.Len(), s3)
+		fmt.Printf("Arp Count=%d %s\n", dev.MacTable.Len(), s3)
 	} else {
 		fmt.Printf("Err=%v\n", err3)
 	}
-}*/
+}

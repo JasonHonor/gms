@@ -1,3 +1,7 @@
+github.com/AlekSi/reflector v0.4.1 h1:onP7kPCAV/EXgHwKz1PyU9K/udpVJ8dVcOMm4brKrJ4=
+github.com/AlekSi/reflector v0.4.1/go.mod h1:K9Yt9Jbte9Xw4QZ3e/ovaWduyRSlKVmwnze4z3+bVxs=
+github.com/AlekSi/zabbix v0.2.0 h1:lOM1yoI3ht+j3/5hYK2CSVizusSPEdkjJP97oOGew0M=
+github.com/AlekSi/zabbix v0.2.0/go.mod h1:hchICSDdFKdMn1yvLi61PyflQ8ab599njDxYsav0anc=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/clbanning/mxj v1.8.5-0.20200714211355-ff02cfb8ea28 h1:LdXxtjzvZYhhUaonAaAKArG3pyC67kGL3YY+6hGG8G4=

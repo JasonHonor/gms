@@ -9,6 +9,8 @@ import (
 	g "github.com/soniah/gosnmp"
 )
 
+var SnmpCount int = 0
+
 func GetSNMPInfo(host, community string, oids []string) {
 	// Default is a pointer to a GoSNMP struct that contains sensible defaults
 	// eg port 161, community public, etc
@@ -45,6 +47,9 @@ func GetSNMPInfo(host, community string, oids []string) {
 }
 
 func WalkSnmpOid(host, community string, oid string, isBinary bool) {
+
+	SnmpCount = 0
+
 	// Default is a pointer to a GoSNMP struct that contains sensible defaults
 	// eg port 161, community public, etc
 	g.Default.Target = host
@@ -71,6 +76,8 @@ func WalkSnmpOid(host, community string, oid string, isBinary bool) {
 }
 
 func printValue(pdu g.SnmpPDU) error {
+
+	SnmpCount++
 	fmt.Printf("%s(%v)= ", pdu.Name, pdu.Type)
 
 	switch pdu.Type {
@@ -84,6 +91,8 @@ func printValue(pdu g.SnmpPDU) error {
 }
 
 func printBinaryValue(pdu g.SnmpPDU) error {
+
+	SnmpCount++
 	fmt.Printf("%s(%v)= ", pdu.Name, pdu.Type)
 
 	switch pdu.Type {
