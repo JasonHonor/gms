@@ -18,3 +18,5 @@ device/huawei/config.json
 device/huawei/cache
 device/cisco/config.json
 device/cisco/c2960_test.go
+device/huawei/secret.json
+device/cisco/secret.json
