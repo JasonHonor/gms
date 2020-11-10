@@ -108,6 +108,10 @@ func GetModelName(mac string) string {
 
 func CreateHostByGroupId(groupId, ip, mac string, t *testing.T) *zabbix.Host {
 
+	if len(ip) == 0 {
+		return nil
+	}
+
 	api := getAPI(t)
 
 	iface := zabbix.HostInterface{IP: ip, Port: "10050", Type: zabbix.Agent, UseIP: 1, Main: 1}

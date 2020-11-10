@@ -36,6 +36,8 @@ type SSHClient struct {
 	LineBreak       string
 
 	ExitCmd string
+
+	KexAlgorithms string
 }
 
 // connect connect to ssh server.
@@ -65,7 +67,11 @@ func (sshClient *SSHClient) connect() (*ssh.Session, error) {
 	}
 
 	clientConfig.Ciphers = append(clientConfig.Ciphers, "aes128-cbc")
-	clientConfig.KeyExchanges = append(clientConfig.KeyExchanges, "diffie-hellman-group1-sha1")
+	if sshClient.KexAlgorithms != "" {
+		clientConfig.KeyExchanges = append(clientConfig.KeyExchanges, sshClient.KexAlgorithms)
+	} else {
+		clientConfig.KeyExchanges = append(clientConfig.KeyExchanges, "diffie-hellman-group1-sha1")
+	}
 
 	// connet to ssh
 	addr = fmt.Sprintf("%s:%d", sshClient.Host, sshClient.Port)
@@ -120,12 +126,15 @@ func (sshClient *SSHClient) Execute(cmdList []string) []string {
 	if err := session.Shell(); err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("%s\n", <-out) //ignore the shell output
+
+	<-out
+	//sWelcome := <-out
+	//log.Printf("Welcome:%s\n", sWelcome) //ignore the shell output
 
 	var ret []string
 
 	for _, cmd := range cmdList {
-		log.Printf("Exec %v\n", cmd)
+		//log.Printf("Exec %v\n", cmd)
 
 		in <- cmd
 

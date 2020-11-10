@@ -3,7 +3,7 @@ package service
 import (
 	//	"encoding/json"
 	//	"errors"
-	"fmt"
+	//	"fmt"
 
 	"github.com/AlekSi/zabbix"
 
@@ -12,7 +12,7 @@ import (
 )
 
 func TestHosts(t *testing.T) {
-	return
+	//return
 
 	api := getAPI(t)
 
@@ -70,11 +70,12 @@ func TestHosts(t *testing.T) {
 }
 
 func TestListHosts(t *testing.T) {
+	return
 	//getAPI(t)
 
-	group := GetHostGroupIdByName(t, 65)
+	//	group := GetHostGroupIdByName(t, 65)
 
-	CreateHostByGroupId(group, "192.168.9.9", "mac", t)
+	// CreateHostByGroupId(group, "192.168.9.9", "mac", t)
 
-	fmt.Printf("Group %v\n", group)
+	//	fmt.Printf("Group %v\n", group)
 }

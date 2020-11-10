@@ -11,21 +11,17 @@ import (
 
 	"github.com/gogf/gf/frame/g"
 	"github.com/gogf/gf/os/gfile"
+
+	. "gms/utils"
 )
 
-type HostPort struct {
-	Name     string `json:"name"`
-	UpStream bool   `json:"upstream"`
-	Host     string `json:"host"`
-}
-
-type HostConfigItem struct {
-	Host      string     `json:"host"`
-	User      string     `json:"user"`
-	Ports     []HostPort `json:"ports"`
-	Community string     `json:"community"`
-	//has walked ?
-	Walked bool
+func findHostSec(hostsec []HostSecret, host string) string {
+	for _, hostSec := range hostsec {
+		if hostSec.Host == host {
+			return hostSec.Passwd
+		}
+	}
+	return ""
 }
 
 func TestGet5700Info(t *testing.T) {
@@ -33,7 +29,34 @@ func TestGet5700Info(t *testing.T) {
 
 	g.Cfg().SetFileName("config.json")
 
-	dev := NewS5700(g.Cfg().Get("host").(string), g.Cfg().Get("user").(string), g.Cfg().Get("pwd").(string))
+	//return
+	hostSecrets := []HostSecret{}
+	secBytes := gfile.GetBytes("secret.json")
+	errSec := json.Unmarshal(secBytes, &hostSecrets)
+	if errSec != nil {
+		fmt.Printf("Error:%v\n", errSec)
+		return
+	}
+
+	fmt.Printf("HostSecrets:%v\n", hostSecrets)
+
+	hosts := []HostConfigItem{}
+	intBytes := gfile.GetBytes("config.json")
+
+	err := json.Unmarshal(intBytes, &hosts)
+	if err != nil {
+		fmt.Printf("Error:%v\n", err)
+	}
+
+	host := hosts[0].Host
+	pwd := findHostSec(hostSecrets, host)
+
+	if pwd == "" {
+		fmt.Printf("NoPassword return \n")
+		return
+	}
+
+	dev := NewS5700(hosts[0].Host, hosts[0].User, pwd)
 
 	dev.Probe()
 	dev.Save()
@@ -138,65 +161,70 @@ func TestGetSnmpInfo(t *testing.T) {
 		[]string{hOids.SysName, hOids.SysDescription, hOids.SysUptime, hOids.SysObjectID})
 }
 
-func TestWalkSnmpOid(t *testing.T) {
-	return
-
-	hOids := NewHuaweiSnmpOids()
-	/*utils.WalkSnmpOid("172.20.65.254", "",
-		hOids.PhysicalNameTable)
-
-	//cOids := NewCiscoSnmpOids()
-	utils.WalkSnmpOid("172.20.65.249", "",
-		hOids.PhysicalNameTable)
-
-	utils.WalkSnmpOid("172.20.65.254", "",
-		hOids.IfDescrTable)
-
-	utils.WalkSnmpOid("172.20.65.249", "",
-		hOids.IfDescrTable)*/
-	fmt.Println("---------EAST-CORE------------------")
-	utils.WalkSnmpOid("172.20.65.254", "",
-		hOids.ArpTable, true)
-
-	fmt.Println("---------WEST-CORE------------------")
-	utils.WalkSnmpOid("172.20.65.250", "",
-		hOids.ArpTable, true)
-
-	fmt.Println("---------WEST-C5------------------")
-	utils.WalkSnmpOid("172.20.65.249", "",
-		hOids.ArpTable, true)
-
-	fmt.Println("---------WEST-C4------------------")
-	utils.WalkSnmpOid("172.20.65.251", "",
-		hOids.ArpTable, true)
-
-	fmt.Println("---------WEST-C3------------------")
-	utils.WalkSnmpOid("172.20.65.252", "",
-		hOids.ArpTable, true)
-
-	fmt.Println("---------EAST-B3------------------")
-	utils.WalkSnmpOid("172.20.65.247", "",
-		hOids.ArpTable, true)
-
-	fmt.Println("---------WEST-B2------------------")
-	utils.WalkSnmpOid("172.20.65.248", "",
-		hOids.ArpTable, true)
-}
-
-func WalkHost(host HostConfigItem) {
+func WalkHost(host HostConfigItem, filters []utils.FilterItem) {
+	//return
 	fmt.Printf("Host %v\n", host.Host)
-
-	sOid := "1.3.6.1.2.1.4.22.1.2"
-
-	if host.Community != "" {
-		utils.WalkSnmpOid(host.Host, host.Community,
-			sOid, true)
-
-		fmt.Printf("Host %v Count=%d\n", host.Host, utils.SnmpCount)
-	}
+	/*
+		sOid := "1.3.6.1.2.1.4.22.1.2"
+		if host.Community != "" {
+			utils.WalkSnmpOid(host.Host, host.Community,
+				sOid, true, filters)
+			fmt.Printf("Host %v Count=%d\n", host.Host, utils.SnmpCount)
+		}
+	*/
 }
 
-func TestWalkConfigFile(t *testing.T) {
+func GetFilterData() []FilterItem {
+	return nil
+
+	var filters []FilterItem
+
+	filters = append(filters, utils.FilterItem{
+		Name:  "GE26",
+		Type:  "mac",
+		Value: " 2c:44:fd:7d:5d:e0 ",
+	})
+
+	filters = append(filters, utils.FilterItem{
+		Name:  "GE35",
+		Type:  "mac",
+		Value: "  e4:11:5b:0c:89:6a  ",
+	})
+
+	filters = append(filters, utils.FilterItem{
+		Name:  "GE39",
+		Type:  "mac",
+		Value: "  ac:16:2d:75:2a:76  ",
+	})
+
+	filters = append(filters, utils.FilterItem{
+		Name:  "GE40",
+		Type:  "mac",
+		Value: "  24:5e:be:0e:18:f0  ",
+	})
+
+	filters = append(filters, utils.FilterItem{
+		Name:  "GE41",
+		Type:  "mac",
+		Value: "   24:5e:be:0e:18:f1   ",
+	})
+
+	filters = append(filters, utils.FilterItem{
+		Name:  "GE42",
+		Type:  "mac",
+		Value: "   24:5e:be:0e:18:f3   ",
+	})
+
+	filters = append(filters, utils.FilterItem{
+		Name:  "GE43",
+		Type:  "mac",
+		Value: "   24:5e:be:0e:18:f2   ",
+	})
+
+	return filters
+}
+
+func TestSnmpWalkConfigFile(t *testing.T) {
 
 	hosts := []HostConfigItem{}
 
@@ -207,11 +235,13 @@ func TestWalkConfigFile(t *testing.T) {
 		fmt.Printf("Error:%v\n", err)
 	}
 
-	fmt.Printf("Hosts:%v\n", hosts)
+	//fmt.Printf("Hosts:%v\n", hosts)
 
 	for _, host := range hosts {
 		if !host.Walked {
-			WalkHost(host)
+			if !strings.HasPrefix(host.Host, "#") {
+				WalkHost(host, GetFilterData())
+			}
 		}
 	}
 }

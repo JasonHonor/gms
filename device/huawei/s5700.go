@@ -8,6 +8,8 @@ import (
 
 	"encoding/json"
 
+	"gms/device"
+
 	"github.com/gogf/gf/container/garray"
 	"github.com/gogf/gf/container/gmap"
 	"github.com/gogf/gf/container/gset"
@@ -62,6 +64,8 @@ type ArpItem struct {
 type S5700 struct {
 	SSHClient
 
+	KexAlgorithms string
+
 	//Switch interface list
 	InterfaceList *gset.Set
 
@@ -96,6 +100,8 @@ func (dev *S5700) Probe() {
 	for _, ret := range results {
 		//fetch first line
 		lines := strings.Split(ret, dev.LineBreak)
+
+		//fmt.Printf("=========ResultLine Count=%d ========%v===============\n", len(lines), lines[0])
 
 		if len(lines) > 0 && lines[0] == "disp ip int bri" {
 			dev.ParseIpInterface(lines)
@@ -211,13 +217,28 @@ func (dev *S5700) DumpArpTables() {
 	fmt.Printf("ArpSum Total:%d Phone:%d PC:%d\n", dev.ArpTable.Len(), dev.PhoneTable.Len(), dev.ArpTable.Len()-dev.PhoneTable.Len())
 }
 
-func NewS5700(host, user, pwd string) *S5700 {
+func (dev *S5700) Connect() {
+
+}
+
+func (dev *S5700) Close() {
+
+}
+
+func (dev *S5700) Save() {
+	dev.Execute([]string{
+		"save",
+		"Y",
+	})
+}
+
+func NewS5700(hostConf device.HostConfigItem, hostSec *device.HostSecret) *S5700 {
 	return &S5700{
 		SSHClient: SSHClient{
-			Host:            host,
+			Host:            hostConf.Host,
 			Port:            22,
-			Username:        user,
-			Password:        pwd,
+			Username:        hostConf.User,
+			Password:        hostSec.Passwd,
 			MoreTag:         "---- More ----",
 			IsMoreLine:      true,
 			MoreWant:        " ",
@@ -226,6 +247,7 @@ func NewS5700(host, user, pwd string) *S5700 {
 			SysEnablePrompt: "]",
 			LineBreak:       "\r\n",
 			ExitCmd:         "quit",
+			KexAlgorithms:   hostConf.KexAlgorithms,
 		},
 		InterfaceList:   gset.NewSet(),
 		InterfaceIpList: gset.NewSet(),

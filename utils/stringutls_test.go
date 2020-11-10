@@ -37,3 +37,22 @@ func TestRemovePartBytes(t *testing.T) {
 
 	fmt.Printf("Result:%v\n", hex.EncodeToString(ret))
 }
+
+func TestMacFormat(t *testing.T) {
+
+	s0 := MacFormat("08:f1:ea:ee:f9")
+	fmt.Printf("result:%s\n", s0)
+
+	s1 := MacFormat("08:f1:ea:ee:f9:a8")
+	fmt.Printf("result:%s\n", s1)
+
+	s2 := MacFormat("08-f1-ea-ee-f9-a8")
+	fmt.Printf("result:%s\n", s2)
+
+	s3 := MacFormat("08.f1.ea.ee.f9.a8")
+	fmt.Printf("result:%s\n", s3)
+
+	s4 := MacFormat(" 08.f1.ea.ee.f9.a8 ")
+	fmt.Printf("result:%s\n", s4)
+
+}

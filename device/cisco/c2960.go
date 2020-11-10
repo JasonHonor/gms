@@ -3,7 +3,9 @@ package cisco
 import (
 	"encoding/json"
 	"fmt"
+	"gms/device"
 	"gms/utils"
+	. "gms/utils"
 	"strings"
 
 	"github.com/gogf/gf/container/garray"
@@ -89,15 +91,15 @@ func (dev *C2960) Probe() {
 		"show mac addr",
 	})
 
-	fmt.Printf("results %v\n", results)
+	//fmt.Printf("results %v\n", results)
 
 	for _, ret := range results {
 		//fetch first line
 		lines := strings.Split(ret, dev.LineBreak)
 
-		if len(lines) > 0 {
+		/*if len(lines) > 0 {
 			fmt.Printf("line = %s\n", lines[0])
-		}
+		}*/
 
 		if len(lines) > 0 && lines[0] == "disp ip int bri" {
 			dev.ParseIpInterface(lines)
@@ -165,5 +167,43 @@ func (dev *C2960) DumpMacTables() {
 		fmt.Printf("Arp Count=%d %s\n", dev.MacTable.Len(), s3)
 	} else {
 		fmt.Printf("Err=%v\n", err3)
+	}
+}
+
+func (dev *C2960) Connect() {
+
+}
+
+func (dev *C2960) Close() {
+
+}
+
+func (dev *C2960) Save() {
+
+}
+
+func NewC2960(hostConf device.HostConfigItem, hostSec *device.HostSecret) *C2960 {
+	return &C2960{
+		SSHClient: SSHClient{
+			Host:            hostConf.Host,
+			Port:            22,
+			Username:        hostConf.User,
+			Password:        hostSec.Passwd,
+			MoreTag:         " --More-- ",
+			MoreWant:        " ",
+			IsMoreLine:      false,
+			ColorTag:        "080808080808080808H",
+			ReadOnlyPrompt:  "#",
+			SysEnablePrompt: "#",
+			LineBreak:       "\r\n",
+			ExitCmd:         "exit",
+			KexAlgorithms:   hostConf.KexAlgorithms,
+		},
+		InterfaceList:   gset.NewSet(),
+		InterfaceIpList: gset.NewSet(),
+		ArpTable:        garray.NewArray(),
+		MacTable:        garray.NewArray(),
+		PhoneTable:      garray.NewArray(),
+		UpStreamIf:      "GigabitEthernet0/0/24",
 	}
 }

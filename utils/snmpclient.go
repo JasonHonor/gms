@@ -5,11 +5,20 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	g "github.com/soniah/gosnmp"
 )
 
 var SnmpCount int = 0
+var Sfilters []FilterItem
+var SPrefix string
+
+type FilterItem struct {
+	Name  string
+	Type  string
+	Value string
+}
 
 func GetSNMPInfo(host, community string, oids []string) {
 	// Default is a pointer to a GoSNMP struct that contains sensible defaults
@@ -46,9 +55,11 @@ func GetSNMPInfo(host, community string, oids []string) {
 	}
 }
 
-func WalkSnmpOid(host, community string, oid string, isBinary bool) {
+func WalkSnmpOid(host, community string, oid string, isBinary bool, filters []FilterItem) {
 
 	SnmpCount = 0
+	SPrefix = oid
+	Sfilters = filters
 
 	// Default is a pointer to a GoSNMP struct that contains sensible defaults
 	// eg port 161, community public, etc
@@ -73,6 +84,8 @@ func WalkSnmpOid(host, community string, oid string, isBinary bool) {
 			os.Exit(1)
 		}
 	}
+
+	fmt.Printf("Count=%d\n", SnmpCount)
 }
 
 func printValue(pdu g.SnmpPDU) error {
@@ -93,7 +106,8 @@ func printValue(pdu g.SnmpPDU) error {
 func printBinaryValue(pdu g.SnmpPDU) error {
 
 	SnmpCount++
-	fmt.Printf("%s(%v)= ", pdu.Name, pdu.Type)
+	//fmt.Printf("%s(%v)= ", pdu.Name, pdu.Type)
+	//fmt.Printf("%s\n", pdu.Name)
 
 	switch pdu.Type {
 	case g.OctetString:
@@ -108,7 +122,17 @@ func printBinaryValue(pdu g.SnmpPDU) error {
 					str += "."
 				}
 			}
-			fmt.Printf("MACADDR: %s\n", str)
+
+			for _, item := range Sfilters {
+				sMac := MacFormat(item.Value)
+				if sMac != "" && str == sMac {
+					fmt.Printf("%s %s MACADDR: %s\n", item.Name, strings.Replace(pdu.Name, SPrefix, "", -1), str)
+				}
+			}
+
+			if len(Sfilters) == 0 {
+				fmt.Printf("%s MACADDR: %s\n", strings.Replace(pdu.Name, SPrefix, "", -1), str)
+			}
 		}
 	default:
 		fmt.Printf("TYPE %d: %d\n", pdu.Type, g.ToBigInt(pdu.Value))

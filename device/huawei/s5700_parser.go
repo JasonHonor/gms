@@ -66,7 +66,13 @@ func (dev *S5700) ParseInterface(lines []string) {
 
 func (dev *S5700) ParseArp(lines []string) {
 
-	sPhonePrefix := g.Cfg().Get("phone", "").(string)
+	var sPhonePrefix string
+
+	oPhone := g.Cfg().Get("phone")
+
+	if oPhone != nil {
+		sPhonePrefix = oPhone.(string)
+	}
 
 	var isData bool = false
 	var lastId int

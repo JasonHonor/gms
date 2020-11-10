@@ -20,3 +20,7 @@ device/cisco/config.json
 device/cisco/c2960_test.go
 device/huawei/secret.json
 device/cisco/secret.json
+/device/config.json
+/device/secret.json
+/device/examples/config.json
+/device/examples/secret.json

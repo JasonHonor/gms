@@ -78,3 +78,33 @@ func RemoveStrByTagBytes(buf []byte, beginTag, endTag []byte, strPrepend string)
 		return buf
 	}
 }
+
+func RemoveMacSeperator(mac string) string {
+	var sMacIn string
+	sMacIn = mac
+
+	sMacIn = strings.TrimLeft(sMacIn, " ")
+	sMacIn = strings.TrimRight(sMacIn, " ")
+
+	var sNoTagStr string
+	if strings.Index(sMacIn, ":") > 0 {
+		sNoTagStr = strings.ReplaceAll(sMacIn, ":", "")
+	} else if strings.Index(sMacIn, "-") > 0 {
+		sNoTagStr = strings.ReplaceAll(sMacIn, "-", "")
+	} else if strings.Index(sMacIn, ".") > 0 {
+		sNoTagStr = strings.ReplaceAll(sMacIn, ".", "")
+	}
+	return sNoTagStr
+}
+
+func FormatMacAddrWord(mac string) string {
+	if len(mac) < 12 {
+		return ""
+	} else {
+		return mac[:4] + "." + mac[4:8] + "." + mac[8:12]
+	}
+}
+
+func MacFormat(mac string) string {
+	return FormatMacAddrWord(RemoveMacSeperator(mac))
+}

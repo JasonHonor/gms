@@ -1,11 +1,9 @@
 package cisco
 
 import (
-	"fmt"
+	//	"fmt"
 	"gms/utils"
 	"strings"
-
-	"github.com/gogf/gf/frame/g"
 )
 
 func (dev *C2960) ParseIpInterface(lines []string) {
@@ -64,9 +62,7 @@ func (dev *C2960) ParseInterface(lines []string) {
 }
 
 func (dev *C2960) ParseArp(lines []string) {
-	fmt.Printf("ParseMacAddr\n")
-
-	sPhonePrefix := g.Cfg().Get("phone").(string)
+	//fmt.Printf("ParseMacAddr\n")
 
 	var isData bool = false
 	for _, li := range lines {
@@ -90,9 +86,11 @@ func (dev *C2960) ParseArp(lines []string) {
 				//save interface info
 				dev.ArpTable.Append(arp)
 
-				if len(sPhonePrefix) > 0 && strings.Contains(arp.Mac, sPhonePrefix) {
-					dev.PhoneTable.Append(arp)
-				}
+				/*
+					if len(sPhonePrefix) > 0 && strings.Contains(arp.Mac, sPhonePrefix) {
+						dev.PhoneTable.Append(arp)
+					}
+				*/
 			}
 		}
 	}
@@ -126,7 +124,7 @@ func (dev *C2960) UpdateArpTable(mac, vlan, intf string) {
 
 func (dev *C2960) ParseMacAddr(lines []string) {
 
-	fmt.Printf("ParseMacAddr\n")
+	//fmt.Printf("ParseMacAddr\n")
 
 	//sPhonePrefix := g.Cfg().Get("phone").(string)
 

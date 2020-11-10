@@ -8,7 +8,7 @@ import (
 	"github.com/gogf/gf/os/gfile"
 )
 
-func (dev *S5700) Save() {
+func (dev *S5700) SaveToCache() {
 
 	s, err := json.Marshal(dev.InterfaceList)
 	if err == nil {
