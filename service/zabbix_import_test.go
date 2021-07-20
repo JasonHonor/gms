@@ -73,7 +73,7 @@ func TestImportCSV(t *testing.T) {
 
 	ch = make(chan bool)
 
-	err := gfile.ReadLines("2020.7-W.csv", processText)
+	err := gfile.ReadLines("/download/2020.7-W.csv", processText)
 
 	if err != nil {
 		fmt.Printf("Error %v\n", err)

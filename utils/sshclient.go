@@ -32,6 +32,7 @@ type SSHClient struct {
 	ColorTag string
 
 	ReadOnlyPrompt  string
+	ReadOnlyPrompt2 string
 	SysEnablePrompt string
 	LineBreak       string
 
@@ -66,12 +67,19 @@ func (sshClient *SSHClient) connect() (*ssh.Session, error) {
 		HostKeyCallback: hostKeyCallbk,
 	}
 
-	clientConfig.Ciphers = append(clientConfig.Ciphers, "aes128-cbc")
+	clientConfig.Ciphers = append(clientConfig.Ciphers, "aes128-cbc", "aes128-ctr")
+
 	if sshClient.KexAlgorithms != "" {
 		clientConfig.KeyExchanges = append(clientConfig.KeyExchanges, sshClient.KexAlgorithms)
 	} else {
 		clientConfig.KeyExchanges = append(clientConfig.KeyExchanges, "diffie-hellman-group1-sha1")
 	}
+
+	/*if sshClient.Cipher != "" {
+		clientConfig.Cipher = append(clientConfig.Cipher, sshClient.Cipher)
+	} else {
+		clientConfig.Cipher = append(clientConfig.Cipher, "diffie-hellman-group1-sha1")
+	}*/
 
 	// connet to ssh
 	addr = fmt.Sprintf("%s:%d", sshClient.Host, sshClient.Port)
@@ -109,6 +117,8 @@ func (sshClient *SSHClient) Execute(cmdList []string) []string {
 		log.Fatalf("request pty error: %s\n", err1.Error())
 	}
 
+	log.Println("PtyRequested.")
+
 	w, err := session.StdinPipe()
 	if err != nil {
 		panic(err)
@@ -127,19 +137,19 @@ func (sshClient *SSHClient) Execute(cmdList []string) []string {
 		log.Fatal(err)
 	}
 
-	<-out
-	//sWelcome := <-out
-	//log.Printf("Welcome:%s\n", sWelcome) //ignore the shell output
+	//<-out
+	sWelcome := <-out
+	log.Printf("Welcome:%s\n", sWelcome) //ignore the shell output
 
 	var ret []string
 
 	for _, cmd := range cmdList {
-		//log.Printf("Exec %v\n", cmd)
+		log.Printf("Exec %v\n", cmd)
 
 		in <- cmd
 
 		sOut := <-out
-		//log.Printf("%s\n", sOut)
+		log.Printf("Result-%s\n", sOut)
 		ret = append(ret, sOut)
 	}
 
@@ -184,7 +194,7 @@ func (sshClient *SSHClient) MuxShell(w io.Writer, r, e io.Reader) (chan<- string
 			result := string(buf[:t])
 
 			line := string(buf[t-n : t])
-			//fmt.Printf("Line:=>%v\n", line)
+			fmt.Printf("Line:=>%v\n", line)
 
 			if strings.Contains(line, sshClient.MoreTag) {
 				if sshClient.IsMoreLine {
@@ -222,10 +232,11 @@ func (sshClient *SSHClient) MuxShell(w io.Writer, r, e io.Reader) (chan<- string
 			if strings.Contains(result, "username:") ||
 				strings.Contains(result, "password:") ||
 				strings.Contains(result, sshClient.ReadOnlyPrompt) ||
+				(len(sshClient.ReadOnlyPrompt2) > 0 && strings.Contains(result, sshClient.ReadOnlyPrompt2)) ||
 				strings.Contains(result, sshClient.SysEnablePrompt) {
 
-				//sOut := string(buf[:t])
-				//fmt.Printf("DataOut:%v\n", sOut)
+				sOut := string(buf[:t])
+				fmt.Printf("DataOut:%v\n", sOut)
 
 				out <- string(buf[:t])
 				t = 0
@@ -233,6 +244,8 @@ func (sshClient *SSHClient) MuxShell(w io.Writer, r, e io.Reader) (chan<- string
 			}
 		}
 	}()
+
+	fmt.Printf("ExecuteResult:=>%v\n", out)
 	return in, out
 }
 

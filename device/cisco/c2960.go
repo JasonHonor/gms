@@ -69,13 +69,6 @@ type Interface struct {
 	OutErrors string
 }
 
-type ArpItem struct {
-	IP        string
-	Mac       string
-	Vlan      string
-	Interface string
-}
-
 func (dev *C2960) Probe() {
 
 	if dev.InterfaceIpList == nil {
@@ -91,15 +84,15 @@ func (dev *C2960) Probe() {
 		"show mac addr",
 	})
 
-	//fmt.Printf("results %v\n", results)
+	fmt.Printf("results %v\n", results)
 
 	for _, ret := range results {
 		//fetch first line
 		lines := strings.Split(ret, dev.LineBreak)
 
-		/*if len(lines) > 0 {
+		if len(lines) > 0 {
 			fmt.Printf("line = %s\n", lines[0])
-		}*/
+		}
 
 		if len(lines) > 0 && lines[0] == "disp ip int bri" {
 			dev.ParseIpInterface(lines)
@@ -194,6 +187,7 @@ func NewC2960(hostConf device.HostConfigItem, hostSec *device.HostSecret) *C2960
 			IsMoreLine:      false,
 			ColorTag:        "080808080808080808H",
 			ReadOnlyPrompt:  "#",
+			ReadOnlyPrompt2: ">",
 			SysEnablePrompt: "#",
 			LineBreak:       "\r\n",
 			ExitCmd:         "exit",
@@ -206,4 +200,8 @@ func NewC2960(hostConf device.HostConfigItem, hostSec *device.HostSecret) *C2960
 		PhoneTable:      garray.NewArray(),
 		UpStreamIf:      "GigabitEthernet0/0/24",
 	}
+}
+
+func (dev *C2960) GetArpTable() *garray.Array {
+	return dev.ArpTable
 }

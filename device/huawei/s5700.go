@@ -53,13 +53,6 @@ type Interface struct {
 	OutErrors string
 }
 
-type ArpItem struct {
-	IP        string
-	Mac       string
-	Vlan      string
-	Interface string
-}
-
 // S5700 Switch demo
 type S5700 struct {
 	SSHClient
@@ -95,6 +88,7 @@ func (dev *S5700) Probe() {
 		"disp int bri",
 		"disp ip int bri",
 		"disp arp",
+		"disp mac-addr",
 	})
 
 	for _, ret := range results {
@@ -114,6 +108,10 @@ func (dev *S5700) Probe() {
 		if len(lines) > 0 && lines[0] == "disp arp" {
 			dev.ParseArp(lines)
 			dev.CalcArpTables()
+		}
+
+		if len(lines) > 0 && lines[0] == "disp mac-addr" {
+			dev.ParseMacAddr(lines)
 		}
 	}
 }
@@ -256,4 +254,8 @@ func NewS5700(hostConf device.HostConfigItem, hostSec *device.HostSecret) *S5700
 		IfArpCounts:     gmap.NewStrIntMap(),
 		UpStreamIf:      "GigabitEthernet0/0/24",
 	}
+}
+
+func (dev *S5700) GetArpTable() *garray.Array {
+	return dev.ArpTable
 }

@@ -2,6 +2,7 @@ package huawei
 
 import (
 	"fmt"
+	"gms/utils"
 	"io/ioutil"
 	"strings"
 )
@@ -10,7 +11,7 @@ import (
 func (dev *S5700) FindInterfaceByIP(ip string) string {
 	var interfaceName string
 	dev.ArpTable.Iterator(func(k int, v interface{}) bool {
-		arpItem, ok1 := v.(ArpItem)
+		arpItem, ok1 := v.(utils.ArpItem)
 		if ok1 {
 			if arpItem.IP == ip {
 				interfaceName = arpItem.Interface
@@ -23,12 +24,12 @@ func (dev *S5700) FindInterfaceByIP(ip string) string {
 }
 
 //FindArpListByMac find arp items by mac substring.
-func (dev *S5700) FindArpListByMac(mac string) []ArpItem {
+func (dev *S5700) FindArpListByMac(mac string) []utils.ArpItem {
 
-	arpItemList := []ArpItem{}
+	arpItemList := []utils.ArpItem{}
 
 	dev.ArpTable.Iterator(func(k int, v interface{}) bool {
-		arpItem, ok1 := v.(ArpItem)
+		arpItem, ok1 := v.(utils.ArpItem)
 		if ok1 {
 			if strings.Contains(strings.ToUpper(arpItem.Mac), strings.ToUpper(mac)) {
 				arpItemList = append(arpItemList, arpItem)
@@ -40,12 +41,12 @@ func (dev *S5700) FindArpListByMac(mac string) []ArpItem {
 	return arpItemList
 }
 
-func (dev *S5700) FindArpListByMacVlan(mac, vlan string) []ArpItem {
+func (dev *S5700) FindArpListByMacVlan(mac, vlan string) []utils.ArpItem {
 
-	arpItemList := []ArpItem{}
+	arpItemList := []utils.ArpItem{}
 
 	dev.ArpTable.Iterator(func(k int, v interface{}) bool {
-		arpItem, ok1 := v.(ArpItem)
+		arpItem, ok1 := v.(utils.ArpItem)
 		if ok1 {
 			if strings.Contains(strings.ToUpper(arpItem.Mac), strings.ToUpper(mac)) && arpItem.Vlan == vlan {
 				arpItemList = append(arpItemList, arpItem)

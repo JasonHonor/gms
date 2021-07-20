@@ -1,5 +1,9 @@
 package device
 
+import (
+	"github.com/gogf/gf/container/garray"
+)
+
 type HostSecret struct {
 	Host      string `json:"host"`
 	Passwd    string `json:"pwd"`
@@ -9,7 +13,6 @@ type HostSecret struct {
 type HostPort struct {
 	Name     string `json:"name"`
 	UpStream bool   `json:"upstream"`
-	Host     string `json:"host"`
 }
 
 type HostConfigItem struct {
@@ -31,6 +34,8 @@ type Device interface {
 	Save()
 	//disconnect from device
 	Close()
+
+	GetArpTable() *garray.Array
 }
 
 //find secret-info by host

@@ -55,4 +55,7 @@ func TestMacFormat(t *testing.T) {
 	s4 := MacFormat(" 08.f1.ea.ee.f9.a8 ")
 	fmt.Printf("result:%s\n", s4)
 
+	s5 := MacFormat(" 08f1-eaee-f9a8 ")
+	fmt.Printf("result:%s\n", s5)
+
 }

@@ -1,6 +1,7 @@
 package huawei
 
 import (
+	"fmt"
 	"gms/utils"
 	"strings"
 
@@ -64,7 +65,16 @@ func (dev *S5700) ParseInterface(lines []string) {
 	}
 }
 
+func (dev *S5700) TranslateInterface(name string) string {
+	if dev.UpStreamIf == name {
+		return "UpStream"
+	} else {
+		return name
+	}
+}
+
 func (dev *S5700) ParseArp(lines []string) {
+	fmt.Printf("Parse arp table,line-count=%v\n", len(lines))
 
 	var sPhonePrefix string
 
@@ -89,11 +99,12 @@ func (dev *S5700) ParseArp(lines []string) {
 
 			if len(cols) > 4 {
 
-				arp := ArpItem{}
+				arp := utils.ArpItem{}
+				arp.Sys = dev.Host
 				arp.IP = cols[0]
-				arp.Mac = cols[1]
+				arp.Mac = utils.MacFormat(cols[1])
 				arp.Vlan = cols[3]
-				arp.Interface = cols[4]
+				arp.Interface = dev.TranslateInterface(cols[4])
 
 				//save interface info
 				dev.ArpTable.Append(arp)
@@ -106,12 +117,71 @@ func (dev *S5700) ParseArp(lines []string) {
 				obj, found := dev.ArpTable.Get(lastId)
 				if found {
 					if len(cols) > 0 {
-						arp := obj.(ArpItem)
+						arp := obj.(utils.ArpItem)
 						arp.Vlan = cols[0]
+						arp.Sys = dev.Host
 						dev.ArpTable.Set(lastId, arp)
 					}
 				}
 			}
 		}
+	}
+}
+
+func (dev *S5700) ParseMacAddr(lines []string) {
+	fmt.Printf("Parse mac table,line-count=%v\n", len(lines))
+
+	var isData bool = false
+	for idx, li := range lines {
+		//skip title line
+		if idx == 5 {
+			isData = true
+			continue
+		}
+
+		if isData {
+			cols := utils.SplitColumns(li, " ")
+			//fmt.Printf("Cols:%v\n", cols)
+
+			if len(cols) > 5 {
+
+				arp := utils.ArpItem{}
+				arp.Sys = dev.Host
+				arp.IP = ""
+				arp.Mac = utils.MacFormat(strings.Trim(cols[0], " "))
+				arp.Vlan = strings.Trim(cols[1], " ")
+				arp.Interface = dev.TranslateInterface(strings.Trim(cols[4], " "))
+
+				dev.UpdateArpTable(arp.Mac, arp.IP, arp.Interface)
+			}
+		}
+	}
+}
+
+func (dev *S5700) UpdateArpTable(mac, vlan, intf string) {
+	var bFound bool = false
+	dev.ArpTable.Iterator(func(k int, v interface{}) bool {
+		arpItem, ok1 := v.(utils.ArpItem)
+		if ok1 {
+			if strings.Contains(arpItem.Mac, mac) {
+				arpItem.Interface = intf
+				arpItem.Vlan = vlan
+				arpItem.Sys = dev.Host
+				dev.ArpTable.Set(k, arpItem)
+				bFound = true
+				return false
+			}
+		}
+		return true
+	})
+
+	if !bFound {
+		item := utils.ArpItem{}
+		item.Interface = intf
+		item.Mac = mac
+		item.Vlan = vlan
+		item.Sys = dev.Host
+
+		dev.ArpTable.Append(item)
 	}
 }

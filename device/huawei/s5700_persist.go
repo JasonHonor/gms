@@ -51,7 +51,7 @@ func (dev *S5700) Load() {
 		dev.InterfaceIpList.Add(ipt)
 	}
 
-	arpList := []ArpItem{}
+	arpList := []utils.ArpItem{}
 	arpBytes := gfile.GetBytes("cache" + utils.PathSep() + dev.Host + "-arp.json")
 	json.Unmarshal(arpBytes, &arpList)
 	for _, arp := range arpList {

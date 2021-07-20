@@ -101,7 +101,7 @@ func FormatMacAddrWord(mac string) string {
 	if len(mac) < 12 {
 		return ""
 	} else {
-		return mac[:4] + "." + mac[4:8] + "." + mac[8:12]
+		return strings.ToUpper(mac[:4] + "." + mac[4:8] + "." + mac[8:12])
 	}
 }
 

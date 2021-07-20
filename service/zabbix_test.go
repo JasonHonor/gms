@@ -11,8 +11,8 @@ import (
 	"testing"
 )
 
-func TestHosts(t *testing.T) {
-	//return
+func TestCreateHosts(t *testing.T) {
+	return
 
 	api := getAPI(t)
 
